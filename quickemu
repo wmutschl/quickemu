@@ -229,6 +229,7 @@ function vm_boot() {
       # If there is no disk image, create a new image.
       mkdir -p "${VMDIR}" 2>/dev/null
       ${QEMU_IMG} create -q -f qcow2 "${disk_img}" "${disk}"
+      ${QEMU_IMG} create -q -f qcow2 "${disk_img_extra}" "${disk}"
       if [ $? -ne 0 ]; then
         echo "ERROR! Failed to create ${disk_img}"
         exit 1
@@ -449,7 +450,9 @@ function vm_boot() {
         -drive media=cdrom,index=0,file="${iso}" \
         -drive media=cdrom,index=1,file="${driver_iso}" \
         -drive if=none,id=drive0,cache=directsync,aio=native,format=qcow2,file="${disk_img}" \
+        -drive if=none,id=drive1,cache=directsync,aio=native,format=qcow2,file="${disk_img_extra}" \
         -device virtio-blk-pci,drive=drive0,scsi=off ${STATUS_QUO} \
+        -device virtio-blk-pci,drive=drive1,scsi=off ${STATUS_QUO} \
         ${VIDEO} -display ${OUTPUT},gl=${GL}${OUTPUT_EXTRA} \
         -device qemu-xhci,id=usb,p2=8,p3=8 -device usb-kbd,bus=usb.0 -device usb-tablet,bus=usb.0 ${USB_PASSTHROUGH} \
         -device virtio-net,netdev=nic -netdev ${NET},id=nic \
@@ -474,7 +477,9 @@ function vm_boot() {
       -drive media=cdrom,index=0,file="${iso}" \
       -drive media=cdrom,index=1,file="${driver_iso}" \
       -drive if=none,id=drive0,cache=directsync,aio=native,format=qcow2,file="${disk_img}" \
+      -drive if=none,id=drive1,cache=directsync,aio=native,format=qcow2,file="${disk_img_extra}" \
       -device virtio-blk-pci,drive=drive0,scsi=off ${STATUS_QUO} \
+      -device virtio-blk-pci,drive=drive1,scsi=off ${STATUS_QUO} \
       ${VIDEO} -display ${OUTPUT},gl=${GL}${OUTPUT_EXTRA} \
       -device qemu-xhci,id=usb,p2=8,p3=8 -device usb-kbd,bus=usb.0 -device usb-tablet,bus=usb.0 ${USB_PASSTHROUGH} \
       -device virtio-net,netdev=nic -netdev ${NET},id=nic \
@@ -533,6 +538,7 @@ img=""
 iso=""
 driver_iso=""
 disk_img=""
+disk_img_extra=""
 disk="64G"
 usb_devices=()
 ram=""
