@@ -259,7 +259,7 @@ function vm_boot() {
       else
         # If there is a disk image, that appears to have an install
         # then do not boot from the iso/img
-        iso=""
+        #iso=""
         img=""
       fi
     fi
