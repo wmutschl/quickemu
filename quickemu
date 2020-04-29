@@ -15,11 +15,19 @@ function web_get() {
 
 function disk_delete() {
   if [ -e "${disk_img}" ]; then
-    rm "${disk_img}"
+    rm "${disk_img}"    
     echo "SUCCESS! Deleted ${disk_img}"
   else
     echo "NOTE! ${disk_img} not found. Doing nothing."
   fi
+
+  if [ -e "${disk_img_extra}" ]; then
+    rm "${disk_img_extra}"    
+    echo "SUCCESS! Deleted ${disk_img_extra}"
+  else
+    echo "NOTE! ${disk_img_extra} not found. Doing nothing."
+  fi
+
   local VMNAME=$(basename "${VM}" .conf)
   local SHORTCUT_DIR="/home/${USER}/.local/share/applications/"
   if [ -e ${SHORTCUT_DIR}/${VMNAME}.desktop ]; then
@@ -36,14 +44,25 @@ function snapshot_apply() {
   fi
 
   if [ -e "${disk_img}" ]; then
-    ${QEMU_IMG} snapshot -q -a "${TAG}" "${disk_img}"
+    ${QEMU_IMG} snapshot -q -a "${TAG}" "${disk_img}"    
     if [ $? -eq 0 ]; then
       echo "SUCCESS! Applied snapshot ${TAG} to ${disk_img}"
     else
       echo "ERROR! Failed to apply snapshot ${TAG} to ${disk_img}"
-    fi
+    fi    
   else
     echo "NOTE! ${disk_img} not found. Doing nothing."
+  fi
+
+  if [ -e "${disk_img_extra}" ]; then
+    ${QEMU_IMG} snapshot -q -a "${TAG}" "${disk_img_extra}"    
+    if [ $? -eq 0 ]; then
+      echo "SUCCESS! Applied snapshot ${TAG} to ${disk_img_extra}"
+    else
+      echo "ERROR! Failed to apply snapshot ${TAG} to ${disk_img_extra}"
+    fi    
+  else
+    echo "NOTE! ${disk_img_extra} not found. Doing nothing."
   fi
 }
 
@@ -64,6 +83,17 @@ function snapshot_create() {
   else
     echo "NOTE! ${disk_img} not found. Doing nothing."
   fi
+
+  if [ -e "${disk_img_extra}" ]; then
+    ${QEMU_IMG} snapshot -q -c "${TAG}" "${disk_img_extra}"
+    if [ $? -eq 0 ]; then
+      echo "SUCCESS! Created snapshot ${TAG} of ${disk_img_extra}"
+    else
+      echo "ERROR! Failed to create snapshot ${TAG} of ${disk_img_extra}"
+    fi
+  else
+    echo "NOTE! ${disk_img_extra} not found. Doing nothing."
+  fi
 }
 
 function snapshot_delete() {
@@ -83,11 +113,26 @@ function snapshot_delete() {
   else
     echo "NOTE! ${disk_img} not found. Doing nothing."
   fi
+
+  if [ -e "${disk_img_extra}" ]; then
+    ${QEMU_IMG} snapshot -q -d "${TAG}" "${disk_img_extra}"
+    if [ $? -eq 0 ]; then
+      echo "SUCCESS! Deleted snapshot ${TAG} of ${disk_img_extra}"
+    else
+      echo "ERROR! Failed to delete snapshot ${TAG} of ${disk_img_extra}"
+    fi
+  else
+    echo "NOTE! ${disk_img_extra} not found. Doing nothing."
+  fi
 }
 
 function snapshot_info() {
   if [ -e "${disk_img}" ]; then
     ${QEMU_IMG} info "${disk_img}"
+  fi
+    
+  if [ -e "${disk_img_extra}" ]; then
+    ${QEMU_IMG} info "${disk_img_extra}"
   fi
 }
 
